@@ -77,6 +77,8 @@ class setting:
     sizeFade = True
     maxWidth = 5 # Max width of fade; used as default if fade is off
 
+    instantUpdate = True 
+
     centerOrigin = False # Centers origin of chain at (0,0)
     origin = (-300,0) # Origin of chain; used if centerOrigin is off
     showOrigin = True
@@ -261,7 +263,10 @@ while True:
     else:
         mousePressed = False
 
-    targetX, targetY = targetX + (gotoX-targetX)/20, targetY + (gotoY-targetY)/20
+    if setting.instantUpdate:
+        targetX, targetY = gotoX, gotoY
+    else:
+        targetX, targetY = targetX + (gotoX-targetX)/20, targetY + (gotoY-targetY)/20
 
     # Render frames
     clock_time = time.time() - start_clock_time
