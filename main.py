@@ -69,8 +69,9 @@ def rgb(red, green, blue):
 class setting:
 
     regularChain = True 
-    chainLength = 4 # Number of joints	
-    jointLength = 300 # Length of each joint
+    chainLength = 20 # Number of joints	
+    jointLength = 60 # Length of each joint
+    showJointCounter = True
 
     showVectors = False
     showLastVector = True
@@ -253,6 +254,11 @@ def refresh():
         origin.setFill('red')
         origin.draw(render)
     
+    # Draws Joint counter
+    if setting.showJointCounter:
+        jointCounter = Text(Point(window.width - 35 - (log(round(setting.chainLength/10)*10+9))*10, window.height-25), str(setting.chainLength) + " joints")
+        jointCounter.draw(render)
+
 
     # Sets and displays current FPS
     if FPS.timer > 1:
@@ -328,12 +334,12 @@ while True:
         while keyboard.is_pressed('"'):
             sleep(0.1)
 
-    if keyboard.is_pressed('('):
+    if keyboard.is_pressed("'"):
         if not(setting.showTrail):
             setting.showTrail = True
         else:
             setting.showTrail = False
-        while keyboard.is_pressed('('):
+        while keyboard.is_pressed("'"):
             sleep(0.1)
 
     # Closes window
