@@ -15,6 +15,7 @@ Version: Beta 1.0
 
 # Standard imports
 from math import *
+from pickle import TRUE
 from time import time, sleep
 
 from win32api import EnumDisplayDevices, EnumDisplaySettings, GetKeyState
@@ -67,29 +68,31 @@ def rgb(red, green, blue):
 # Joint chain and render settings
 class setting:
 
-    regularChain = True
-    chainLength = 4
-    jointLength = 300
+    regularChain = True 
+    chainLength = 4 # Number of joints	
+    jointLength = 300 # Length of each joint
 
-    showVector = True
-    colorFade = True
+    showVectors = False
+    showLastVector = True
+    colorFade = True # Fade color between each joint
     color = rgb(63,93,178) # Accepts color name, hex value or rgb value using: rgb(red, green, blue); Used as default if fade is off
     sizeFade = True
-    maxWidth = 5 # Max width of fade; used as default if fade is off
+    maxWidth = 10 # Max width of fade; used as default if fade is off
 
-    instantUpdate = True 
+    instantUpdate = False # Update joints instantly 
 
-    centerOrigin = False # Centers origin of chain at (0,0)
-    origin = (-300,0) # Origin of chain; used if centerOrigin is off
-    showOrigin = True
+    showTrail = False # Only recommended for small amount of joints
+    trailLength = chainLength*15 # Number of points in trail
+    trail = []
+
+
+    origin = (-300,0) # Origin of chain
+    showOrigin = True 
     showTarget = True
-    showFPS = False
+    showFPS = True
 
 # Sets the origin point of the chain
-if setting.centerOrigin:
-    originPX, originPY = 0, 0
-else:
-    originPX, originPY = setting.origin[0], setting.origin[1]
+originPX, originPY = setting.origin[0], setting.origin[1]
 
 # Sets the joint chain; format: [[length1,x1,y1], [length2,x2,y2], ...]
 if setting.regularChain:
@@ -146,6 +149,25 @@ def refresh():
 
     global joints, targetX, targetY, originPX, originPY
     
+
+    # Draws the trail
+    if setting.showTrail:
+
+        for _trail in joints:
+
+            setting.trail.append(Point(_trail[1][0],_trail[1][1]))
+
+            if len(setting.trail) == setting.trailLength:
+                del setting.trail[0]
+
+        for _trail in range(len(setting.trail)-1,0,-1):
+
+            trailFade = rgb(255,255-int((_trail+1)/len(setting.trail)*255),255-int((_trail+1)/len(setting.trail)*255)) 
+            #setting.trail[_trail].draw(render).setFill(trailFade)
+
+            if (_trail != 0) and not(setting.trail[_trail].x == originPX and int(setting.trail[_trail].y) == originPY):
+                Line(setting.trail[_trail], setting.trail[_trail-1]).draw(render).setFill(trailFade)
+
     # Draws the joints
     for _joint in range(len(joints)):
         if _joint == 0:
@@ -166,7 +188,10 @@ def refresh():
 
         jointLine.setWidth(jointWidth)
 
-        if setting.showVector:
+        if setting.showVectors:
+            jointLine.setArrow('last')
+
+        if setting.showLastVector and _joint == len(joints)-1:
             jointLine.setArrow('last')
 
         if setting.colorFade:
@@ -208,7 +233,6 @@ def refresh():
                     joints[__joint] = rotateJoint([joints[0][0],[originPX,originPY]], joints[__joint], shiftAngle)
                 else:
                     joints[__joint] = rotateJoint(joints[_joint-1], joints[__joint], shiftAngle)
-
 
     # ------------------ UI ------------------
 
@@ -275,6 +299,42 @@ while True:
 
     # Prevents FPS from affecting inputs
     inputSpeed = 1.0 / ((FPS.lastValue+0.01) / 120)
+
+
+    # ------------------ Inputs ------------------
+
+    # Render options
+    if keyboard.is_pressed('&'):
+        if not(setting.showLastVector):
+            setting.showLastVector = True
+        else:
+            setting.showLastVector = False
+        while keyboard.is_pressed('&'):
+            sleep(0.1)
+
+    if keyboard.is_pressed('é'):
+        if not(setting.showTarget):
+            setting.showTarget = True
+        else:
+            setting.showTarget = False
+        while keyboard.is_pressed('é'):
+            sleep(0.1)
+
+    if keyboard.is_pressed('"'):
+        if not(setting.instantUpdate):
+            setting.instantUpdate= True
+        else:
+            setting.instantUpdate = False
+        while keyboard.is_pressed('"'):
+            sleep(0.1)
+
+    if keyboard.is_pressed('('):
+        if not(setting.showTrail):
+            setting.showTrail = True
+        else:
+            setting.showTrail = False
+        while keyboard.is_pressed('('):
+            sleep(0.1)
 
     # Closes window
     if keyboard.is_pressed('esc'):
