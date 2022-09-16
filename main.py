@@ -4,8 +4,6 @@
 Simple inverse kinematics test.
 
 Created by ultimatech
-First update: 09/05/2022 11:39
-Last update: 15/05/2022 16:18
 Version: Beta 1.0
 
                     2022
